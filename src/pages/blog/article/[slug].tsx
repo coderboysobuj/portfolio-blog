@@ -15,12 +15,31 @@ import { FaLinkedin, FaGithub, FaTwitter } from "react-icons/fa";
 import AboutAuthor from "../../../components/Blog/Article/AboutAuthor";
 import RelatedArticle from "../../../components/Blog/Article/RelatedArticle";
 import Layout from "../../../components/Layout";
+import { client } from "../../../graphql/apollo-client";
+import PostOperations from "../../../graphql/operations/posts";
+import { Post } from "../../../utils/types";
+import Prism from "prismjs";
+import "prismjs/themes/prism-tomorrow.css";
+import "prismjs/plugins/line-numbers/prism-line-numbers.css";
+import { useEffect } from "react";
 
-const Article: NextPage = () => {
+interface IArticleProps {
+  post: Post;
+}
+
+const Article: NextPage<IArticleProps> = ({ post }) => {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      Prism.highlightAll();
+    }
+  }, [post]);
+
   return (
     <>
       <Head>
-        <title>How to make</title>
+        <title>
+          {post.attributes?.title ? post.attributes.title : "Jisan blog"}
+        </title>
       </Head>
       <Container maxWidth="700px" marginTop={6} padding={2}>
         <Layout>
@@ -72,64 +91,68 @@ const Article: NextPage = () => {
             </Flex>
             <article>
               <Flex flexWrap="wrap" gap={3}>
-                <Text
-                  align="center"
-                  bg="whiteAlpha.400"
-                  padding="1px 2px"
-                  borderRadius="sm"
-                  color="blue.300"
-                >
-                  #reactjs
-                </Text>
-                <Text
-                  align="center"
-                  bg="whiteAlpha.400"
-                  color="blue.300"
-                  padding="1px 2px"
-                  borderRadius="sm"
-                >
-                  #nextjs
-                </Text>
+                {post.attributes?.tags &&
+                  post.attributes.tags.data.map((t) => (
+                    <Text
+                      key={t.attributes.name}
+                      align="center"
+                      bg="whiteAlpha.400"
+                      padding="1px 2px"
+                      borderRadius="sm"
+                      color="blue.300"
+                    >
+                      #{t.attributes.name}
+                    </Text>
+                  ))}
               </Flex>
-              <Box mt={4}>
-                <Text>
-                  {/* Content */}
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                  Aspernatur enim aperiam similique libero distinctio
-                  repellendus, minus corrupti earum, sapiente optio magnam sunt
-                  inventore, perferendis id. Quibusdam atque ex nemo
-                  necessitatibus quae ullam vel sint velit ad omnis, minus neque
-                  tempora laudantium esse illo repellendus doloremque, ipsam
-                  maxime culpa? Excepturi aspernatur dolor neque enim aut
-                  architecto consequatur velit qui modi. Nostrum facilis maxime
-                  nemo unde dolores deleniti dicta iure! Magni, repellat eum
-                  alias totam, quidem culpa assumenda placeat explicabo dolorem
-                  vitae excepturi nostrum nobis et deserunt! Veniam, et ut iusto
-                  illum voluptas laborum. Quod in, animi atque laborum a alias
-                  vitae. Lorem ipsum dolor sit amet consectetur adipisicing
-                  elit. Atque minus dignissimos inventore, sequi earum fuga,
-                  dolore repellat deleniti facere nesciunt culpa iure
-                  perspiciatis, numquam obcaecati aspernatur? Impedit et
-                  delectus, molestias quibusdam aperiam, accusantium iure
-                  corrupti adipisci rerum nesciunt eum animi vel reprehenderit
-                  est! Aliquam minima hic tempora commodi asperiores maiores
-                  perspiciatis amet temporibus cupiditate, inventore vitae, modi
-                  odit sunt ipsa odio illo eveniet praesentium accusamus eum qui
-                  totam beatae? Facilis temporibus hic nihil debitis quasi odio
-                  possimus tempore pariatur aspernatur commodi enim dolorem
-                  sapiente in, dicta fuga. Quia, dolor, animi laborum aliquid
-                  amet aliquam vel ratione libero quae maxime blanditiis?
-                </Text>
-              </Box>
+              <Box
+                mt={4}
+                dangerouslySetInnerHTML={{ __html: post.attributes.body }}
+              ></Box>
             </article>
             <Divider />
             <AboutAuthor />
-            <RelatedArticle />
+            {/* <RelatedArticle /> */}
           </Stack>
         </Layout>
       </Container>
     </>
   );
 };
+
+export async function getStaticPaths() {
+  const { data } = await client.query({
+    query: PostOperations.Querys.getAllSlug,
+  });
+  const paths = data.posts.data?.map((p: any) => {
+    return { params: { slug: p.attributes.slug } };
+  });
+
+  console.log(paths);
+
+  return {
+    paths,
+    fallback: false,
+  };
+}
+
+export async function getStaticProps(ctx: any) {
+  try {
+    const res = await client.query({
+      query: PostOperations.Querys.getPostBySlug,
+      variables: { slug: ctx.params.slug },
+    });
+
+    return {
+      props: {
+        post: res.data.posts.data[0],
+      },
+    };
+  } catch (error: any) {
+    return {
+      notFound: true,
+    };
+  }
+}
 
 export default Article;

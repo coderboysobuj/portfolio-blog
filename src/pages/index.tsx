@@ -53,14 +53,13 @@ const Home: NextPage = () => {
         <meta name="title" content="Jisan Khan Sobuj Portfolio" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Container maxWidth="700px" marginTop={6} marginBottom={4} padding={2}>
-        <Layout>
-          <HomeComponent />
-          <Skils skills={skills} />
-          <TechStack techStacks={techs} />
-          <Projects projects={projects} />
-        </Layout>
-      </Container>
+
+      <Layout>
+        <HomeComponent />
+        <Skils skills={skills} />
+        <TechStack techStacks={techs} />
+        <Projects projects={projects} />
+      </Layout>
     </>
   );
 };

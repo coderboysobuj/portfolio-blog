@@ -1,30 +1,33 @@
 import {
+  Box,
   Container,
+  Flex,
   Heading,
+  Image,
+  SimpleGrid,
   Stack,
   Text,
-  Box,
-  SimpleGrid,
-  Flex,
 } from "@chakra-ui/react";
-import { NextPage } from "next";
+import { NextPage, NextPageContext } from "next";
 import Head from "next/head";
+import Link from "next/link";
+import Card from "../../components/Blog/Card";
+import Layout from "../../components/Layout";
 import { client } from "../../graphql/apollo-client";
 import PostOperations from "../../graphql/operations/posts";
-import Article from "../../components/Blog/Article/Article";
-
-import Layout from "../../components/Layout";
+import CategoryOperations from "../../graphql/operations/category";
 import { Post } from "../../utils/types";
 
-interface IBlogProps {
+interface IPostsByCategoryProps {
   posts: Post[];
 }
 
-const blog: NextPage<IBlogProps> = ({ posts }) => {
+const PostsByCategory: NextPage<IPostsByCategoryProps> = ({ posts }) => {
+  console.log(posts);
   return (
     <>
       <Head>
-        <title>Jisan - Blog</title>
+        <title>Blog/code - Jisan Khan</title>
       </Head>
       <Container maxWidth="700px" marginTop={6} marginBottom={4} padding={2}>
         <Layout>
@@ -46,12 +49,12 @@ const blog: NextPage<IBlogProps> = ({ posts }) => {
               </Flex>
             </Stack>
             <Box>
-              <Heading size="xl">Latest article</Heading>
-              <Stack spacing={5} mt={5}>
+              <Heading size="md">Latest article</Heading>
+              <SimpleGrid columns={2} spacing={4} mt={4}>
                 {posts.map((post) => (
-                  <Article post={post} key={post.id} />
+                  <Card post={post} key={post.id} />
                 ))}
-              </Stack>
+              </SimpleGrid>
             </Box>
           </Stack>
         </Layout>
@@ -59,6 +62,21 @@ const blog: NextPage<IBlogProps> = ({ posts }) => {
     </>
   );
 };
+
+// export async function getStaticPaths() {
+//   const { data } = await client.query({
+//     query: CategoryOperations.Querys.getAllSlug,
+//   });
+//   const paths = data.categories.data?.map((c: any) => {
+//     return { params: { category: c.attributes.slug } };
+//   });
+
+//   return {
+//     paths,
+//     fallback: false,
+//   };
+// }
+
 export async function getServerSideProps(ctx: any) {
   try {
     const res = await client.query({
@@ -77,4 +95,4 @@ export async function getServerSideProps(ctx: any) {
   }
 }
 
-export default blog;
+export default PostsByCategory;

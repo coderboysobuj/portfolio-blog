@@ -12,13 +12,11 @@ const NotFound = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Container maxWidth="700px" marginTop={6} marginBottom={4} padding={2}>
-        <Layout>
-          <Center>
-            <Heading size="2xl">404 page not found</Heading>
-          </Center>
-        </Layout>
-      </Container>
+      <Layout>
+        <Center>
+          <Heading size="2xl">404 page not found</Heading>
+        </Center>
+      </Layout>
     </>
   );
 };
